@@ -10,34 +10,50 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 app.post("/generate", async (req, res) => {
   const keyword = req.body.keyword || "";
+  const isYMYL = req.body.ymyl === true;
+  const style = req.body.style || "paragraph"; // varsayılan paragraf
 
-  // 🔎 Sağlık, finans, hukuk gibi YMYL konularını kontrol et
-  const isYMYL = /health|medical|finance|legal|clinic|dental|surgery|treatment|insurance/i.test(keyword);
+  // 👇 Prompt içerik yapısı tanımı
+  let styleInstruction = "";
+
+  if (style === "ordered") {
+    styleInstruction = `
+Format the output as an ordered list (1., 2., 3., ...). Each item should include a short explanation.
+Example:
+1. Cleanser - Used to remove dirt...
+2. Toner - Helps to balance skin pH...
+`;
+  } else if (style === "unordered") {
+    styleInstruction = `
+Format the output as an unordered list (• or -). Each item should include a short explanation.
+Example:
+• Toyota - Reliable and fuel-efficient...
+• BMW - Luxury-focused brand...
+`;
+  } else {
+    styleInstruction = `
+Format the response as a clear, informative article with paragraphs under relevant subheadings (use ## for H2).
+Avoid list formatting unless absolutely necessary.
+`;
+  }
 
   const systemPrompt = `
-You are a professional blog content writer and SEO strategist. 
-Always write content with high-quality language, structured headings, and factual accuracy.
+You are a professional content writer focused on SEO, clarity, and factual accuracy.
+Do NOT include SEO titles or meta descriptions. Be concise and helpful.
 
 ${isYMYL ? `
-⚠️ The topic is considered YMYL (Your Money or Your Life). 
-You must strictly follow Google’s YMYL & E-E-A-T guidelines:
-- Be accurate and factual
-- Avoid health promises
-- Use medical-neutral tone
-- Prioritize reader trust and clarity
-- Be formal but readable
+⚠️ The topic is considered YMYL (Your Money or Your Life).
+Strictly follow Google's E-E-A-T and YMYL guidelines:
+- Be medically/factually neutral
+- Avoid promises
+- Use formal tone and structure
 ` : `
-This is not a YMYL topic, so you can be more creative and casual while still optimizing for SEO.
+This is not a YMYL topic, so a friendly, casual tone is acceptable as long as it's still informative.
 `}
 
-Structure your response like this:
-- H1 title
-- Meta description (max 160 chars)
-- Introduction (3–4 sentences)
-- 3 H2 sections (each with 1 paragraph)
-- Conclusion
+${styleInstruction}
 
-Use markdown-like formatting (e.g. H1, H2) and write in fluent, neutral English.
+Always write in fluent, clear English. Avoid filler or vague wording. Stick to the point.
 `;
 
   try {
@@ -45,7 +61,7 @@ Use markdown-like formatting (e.g. H1, H2) and write in fluent, neutral English.
       model: "deepseek/deepseek-r1-zero:free",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: "Write a blog post about: " + keyword }
+        { role: "user", content: "Write about: " + keyword }
       ]
     }, {
       headers: {
