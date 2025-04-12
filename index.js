@@ -28,7 +28,7 @@ app.post("/generate", async (req, res) => {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://seninsiten.com", // buraya kendi domainini yaz
+        "HTTP-Referer": "https://tolunaytogul.com", // buraya kendi domainini yaz
         "X-Title": "Topic Generator"
       }
     });
