@@ -32,7 +32,7 @@ app.post("/generate", async (req, res) => {
   res.json(data.choices?.[0]?.message?.content || "Yanıt alınamadı.");
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
