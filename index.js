@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const app = express();
 app.use(cors({
-  origin: "*",
+  origin: "*", // Dilersen buraya "https://www.tolunaytogul.com" yazabilirsin
   methods: ["POST"]
 }));
 app.use(express.json());
@@ -16,7 +16,7 @@ app.post("/generate", async (req, res) => {
 
   try {
     const response = await axios.post("https://openrouter.ai/api/v1/chat/completions", {
-      model: "deepseek-ai/deepseek-llm",
+      model: "deepseek/deepseek-r1-zero:free", // ✅ Doğru model ID
       messages: [
         {
           role: "system",
@@ -31,7 +31,7 @@ app.post("/generate", async (req, res) => {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://www.tolunaytogul.com",
+        "HTTP-Referer": "https://www.tolunaytogul.com", // ✅ Doğru domain
         "X-Title": "Topic Generator"
       }
     });
@@ -50,4 +50,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
-
