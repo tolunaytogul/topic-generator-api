@@ -11,49 +11,48 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 app.post("/generate", async (req, res) => {
   const keyword = req.body.keyword || "";
   const isYMYL = req.body.ymyl === true;
-  const style = req.body.style || "paragraph"; // varsayılan paragraf
+  const style = req.body.style || "paragraph"; // 'ordered', 'unordered', 'paragraph'
 
-  // 👇 Prompt içerik yapısı tanımı
   let styleInstruction = "";
 
   if (style === "ordered") {
     styleInstruction = `
-Format the output as an ordered list (1., 2., 3., ...). Each item should include a short explanation.
-Example:
-1. Cleanser - Used to remove dirt...
-2. Toner - Helps to balance skin pH...
-`;
+Then continue with an ordered list (1., 2., 3., ...), each item explained clearly and thoroughly.`;
   } else if (style === "unordered") {
     styleInstruction = `
-Format the output as an unordered list (• or -). Each item should include a short explanation.
-Example:
-• Toyota - Reliable and fuel-efficient...
-• BMW - Luxury-focused brand...
-`;
+Then continue with an unordered list (• or -), where each item is described clearly.`;
   } else {
     styleInstruction = `
-Format the response as a clear, informative article with paragraphs under relevant subheadings (use ## for H2).
-Avoid list formatting unless absolutely necessary.
-`;
+Then continue with informative paragraphs under additional H2 headings (at least 3).`;
   }
 
   const systemPrompt = `
-You are a professional content writer focused on SEO, clarity, and factual accuracy.
-Do NOT include SEO titles or meta descriptions. Be concise and helpful.
+You are a professional blog content writer. Your goal is to create an informative, helpful, and SEO-friendly article.
 
-${isYMYL ? `
-⚠️ The topic is considered YMYL (Your Money or Your Life).
-Strictly follow Google's E-E-A-T and YMYL guidelines:
-- Be medically/factually neutral
-- Avoid promises
-- Use formal tone and structure
-` : `
-This is not a YMYL topic, so a friendly, casual tone is acceptable as long as it's still informative.
-`}
-
+Always follow this structure:
+1. Start with a clear and descriptive H1 title
+2. Add an engaging introduction (3–5 sentences)
+3. Use a first H2 that directly and clearly answers the topic in one paragraph
 ${styleInstruction}
 
-Always write in fluent, clear English. Avoid filler or vague wording. Stick to the point.
+Total article length must be **at least 1000 words**.
+
+${isYMYL ? `
+⚠️ This is a YMYL (Your Money or Your Life) topic. Follow Google’s E-E-A-T guidelines:
+- Be factual, neutral, and professional
+- Avoid making promises or exaggerated claims
+- Prioritize clarity, credibility, and trust
+` : `
+This is not a YMYL topic. You may use a friendlier tone while remaining informative and structured.
+`}
+
+Write in markdown format:
+- # for H1
+- ## for each H2 section
+
+Do NOT include SEO titles or meta descriptions.
+Match the user’s language automatically (English, Turkish, etc).
+Be clear, structured, and do not include any vague filler text.
 `;
 
   try {
@@ -61,7 +60,7 @@ Always write in fluent, clear English. Avoid filler or vague wording. Stick to t
       model: "deepseek/deepseek-r1-zero:free",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: "Write about: " + keyword }
+        { role: "user", content: "Write a blog post about: " + keyword }
       ]
     }, {
       headers: {
